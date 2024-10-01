@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Contract\PostServiceContract;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+    protected $postService;
+
+    public function __construct(PostServiceContract $postService)
+    {
+        $this->postService = $postService;
+    }
+
     public function create(Request $request)
     {
         $validated_post = $request->validate([
@@ -15,7 +23,7 @@ class PostController extends Controller
             'website_id' => 'required|exists:websites,id'
         ]);
 
-        $post = Post::create($validated_post);
+        $post = $this->postService->createPostForWebsite($validated_post);
 
         return response()->json($post, 201);
     }

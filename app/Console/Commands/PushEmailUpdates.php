@@ -2,13 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Contract\PostServiceContract;
 use App\Jobs\SendPostEmail;
 use App\Models\Post;
+use App\Models\Website;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
 class PushEmailUpdates extends Command
 {
+    protected $postService;
+
     /**
      * The name and signature of the console command.
      *
@@ -28,9 +32,11 @@ class PushEmailUpdates extends Command
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(PostServiceContract $postService)
     {
         parent::__construct();
+
+        $this->postService = $postService;
     }
 
     /**
@@ -40,23 +46,36 @@ class PushEmailUpdates extends Command
      */
     public function handle()
     {
-        $posts = Post::where('is_sent', false)->get();
+//        $this->postService->sendNewPostNotifications(); //Demonstrate my understanding of using Dependency Injection.
 
-        foreach ($posts as $post) {
-            $website = $post->website;
-            $subscribers = $website->subscribers;
+        $websites = Website::all();
 
-            foreach ($subscribers as $subscriber) {
-                Mail::raw("Title: {$post->title}\nDescription: {$post->description}", function ($message) use ($subscriber) {
-                    $message->to($subscriber->email)->subject('New Post Update');
-                });
+        foreach ($websites as $website) {
+            // Retrieve unsent posts for the website
+            $unsentPosts = $website->posts()->where('is_sent', false)->get();
 
-                $post->subscribers()->attach($subscriber);
+            // Skip if there are no unsent posts
+            if ($unsentPosts->isEmpty()) {
+                continue;
             }
 
-            $post->update(['is_sent' => true]);
+            // Fetch all subscribers for the current website
+            $subscribers = $website->subscribers()->pluck('email');
+
+            foreach ($unsentPosts as $post) {
+                foreach ($subscribers as $email) {
+                    // Dispatch the job to send emails in the background
+                    $this->info($post);
+                    SendPostEmail::dispatch($post, $email);
+                }
+
+                // Mark the post as sent
+                $post->update(['is_sent' => true]);
+            }
+
+            $this->info("Email notifications for website '{$website->name}' have been queued.");
         }
 
-        $this->info('Emails sent successfully!');
+        $this->info('All unsent post notifications have been queued for delivery.');
     }
 }

@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Contract\SubscriptionServiceContract;
+use App\Models\Subscriber;
+use App\Models\Website;
+
 class SubscriptionService implements SubscriptionServiceContract
 {
     public function subscribeToWebsite(array $data)
@@ -13,19 +17,8 @@ class SubscriptionService implements SubscriptionServiceContract
             return ['message' => 'User is already subscribed to this website.'];
         }
 
-        // Attach the subscriber to the website
         $website->subscribers()->attach($subscriber);
 
-        // Cache the subscribers list
-        Cache::forget("website_{$website->id}_subscribers");
-        $this->cacheWebsiteSubscribers($website);
-
         return ['message' => 'Subscription successful'];
-    }
-
-    protected function cacheWebsiteSubscribers(Website $website)
-    {
-        $subscribers = $website->subscribers()->pluck('email')->toArray();
-        Cache::put("website_{$website->id}_subscribers", $subscribers, now()->addMinutes(30));
     }
 }

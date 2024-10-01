@@ -9,6 +9,10 @@ class Subscriber extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'email',
+    ];
+
     public function websites()
     {
         return $this->belongsToMany(Website::class, 'website_subscriber');

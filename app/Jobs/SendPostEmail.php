@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Models\Post;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,15 +14,16 @@ class SendPostEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected $post;
+    protected $email;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($title, $description, $email)
+    public function __construct(Post $post, $email)
     {
-        $this->title = $title;
-        $this->description = $description;
+        $this->post = $post;
         $this->email = $email;
     }
 
@@ -33,7 +34,7 @@ class SendPostEmail implements ShouldQueue
      */
     public function handle()
     {
-        Mail::raw("Title: {$this->title}\nDescription: {$this->description}", function ($message) {
+        Mail::raw("Title: {$this->post->title}\nDescription: {$this->post->description}", function ($message) {
             $message->to($this->email)->subject('New Post Update');
         });
     }
