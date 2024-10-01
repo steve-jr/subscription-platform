@@ -2,7 +2,7 @@
 
 namespace App\Contract;
 
-class SubscriptionServiceContract
+interface SubscriptionServiceContract
 {
-
+    public function subscribeToWebsite(array $data);
 }
