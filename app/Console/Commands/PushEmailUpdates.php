@@ -51,7 +51,6 @@ class PushEmailUpdates extends Command
         $websites = Website::all();
 
         foreach ($websites as $website) {
-            // Retrieve unsent posts for the website
             $unsentPosts = $website->posts()->where('is_sent', false)->get();
 
             // Skip if there are no unsent posts
@@ -64,8 +63,10 @@ class PushEmailUpdates extends Command
 
             foreach ($unsentPosts as $post) {
                 foreach ($subscribers as $email) {
+
                     // Dispatch the job to send emails in the background
                     $this->info($post);
+
                     SendPostEmail::dispatch($post, $email);
                 }
 
