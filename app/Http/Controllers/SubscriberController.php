@@ -29,11 +29,11 @@ class SubscriberController extends Controller
             ], 422);
         }
 
-        $response = $this->subscriptionService->subscribeToWebsite($request->all());
+        $data = $this->subscriptionService->subscribeToWebsite($request->all());
 
         return response()->json([
-            'status' => 'sucess',
-            'errors' => $response,
+            'status' => 'success',
+            'data' => $data,
         ], 201);
     }
 }
