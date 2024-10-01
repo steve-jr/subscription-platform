@@ -5,10 +5,20 @@ An API that allows users to subscribe to different websites and receive email no
 
 ## Features
 
-- RESTful APIs for creating new subscribers, and posts.
+- RESTful APIs for creating new subscribers to a website, and posts for a particular website.
 - Uses queues to schedule sending emails in the background.
-- Command to send email updates to subscribers of all websites.
+- Use command `push:email-updates` to send post updates to subscribers of all websites via email.
+- No duplicate stories is sent to a subscriber using `is_sent` flag
+- Seeded data of the websites, subscribers and posts.
+- Using Postman to document and guide developer on usage. 
+- Implemented dependency injection via contracts and services
 - Supports MySQL database and SMTP email service.
+
+## Future Features
+- Use Redis to cache subscribers and posts immediately a new post or subscriber is created.
+- Add app/Events/PostCreated event and app/Listeners/SendPostEmailNotification listener
+- Register the event and listener in EventServiceProvider `$listen` property. 
+- Anytime a post is created, it triggers the listener which sends an email to all subscribers
 
 ## Prerequisites
 
