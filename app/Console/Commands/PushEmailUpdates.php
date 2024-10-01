@@ -46,7 +46,7 @@ class PushEmailUpdates extends Command
      */
     public function handle()
     {
-//        $this->postService->sendNewPostNotifications(); //Demonstrate my understanding of using Dependency Injection.
+//        $this->postService->sendNewPostNotifications(); //Just to demonstrate my understanding of using Dependency Injection.
 
         $websites = Website::all();
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contract\SubscriptionServiceContract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SubscriberController extends Controller
 {
@@ -16,13 +17,23 @@ class SubscriberController extends Controller
 
     public function subscribe(Request $request)
     {
-        $validated_subscriber = $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'website_id' => 'required|exists:websites,id'
         ]);
 
-        $response = $this->subscriptionService->subscribeToWebsite($validated_subscriber);
+        if($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-        return response()->json($response, 201);
+        $response = $this->subscriptionService->subscribeToWebsite($request->all());
+
+        return response()->json([
+            'status' => 'sucess',
+            'errors' => $response,
+        ], 201);
     }
 }
